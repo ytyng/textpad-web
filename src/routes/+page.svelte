@@ -13,7 +13,7 @@
 	};
 </script>
 
-<div class="flex h-full flex-col bg-slate-800">
+<div class="flex h-[max(60vh,calc(100vh-300px))] flex-col">
 	<header class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100">
 		<button
 			type="button"
@@ -52,9 +52,9 @@
 		<h1 class="text-sm font-medium">Textpad</h1>
 	</header>
 
-	<main class="flex flex-1 flex-col overflow-hidden pb-[min(40vh,300px)]">
+	<main class="flex-1 overflow-hidden">
 		<textarea
-			class="flex-1 resize-none bg-slate-900 p-3 text-base text-slate-100 outline-none"
+			class="h-full w-full resize-none bg-neutral-900 p-2 text-base text-slate-100 outline-none font-mono"
 			placeholder="Enter text here..."
 			value={textpadStore.currentContent}
 			oninput={handleInput}
