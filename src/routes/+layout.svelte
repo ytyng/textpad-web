@@ -1,12 +1,20 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
-	
+	import { Toaster } from 'svelte-sonner';
+	import { onMount } from 'svelte';
+	import textpadStore from '$lib/stores/textpad.svelte';
+
 	let { children } = $props();
+
+	onMount(() => {
+		textpadStore.initialize();
+	});
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<title>Textpad</title>
 </svelte:head>
 
 {@render children()}
+
+<Toaster richColors duration={5000} />
