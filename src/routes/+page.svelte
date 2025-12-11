@@ -1,6 +1,11 @@
 <script lang="ts">
 	import textpadStore from '$lib/stores/textpad.svelte';
 	import { toast } from 'svelte-sonner';
+	import QrCreateModal from '$lib/components/QrCreateModal.svelte';
+	import QrScanModal from '$lib/components/QrScanModal.svelte';
+
+	let showQrCreate = $state(false);
+	let showQrScan = $state(false);
 
 	const handleInput = (e: Event) => {
 		const target = e.target as HTMLTextAreaElement;
@@ -10,6 +15,10 @@
 	const handleNewFile = () => {
 		textpadStore.createNewFile();
 		toast.success('New file created');
+	};
+
+	const handleScanned = (data: string) => {
+		textpadStore.setContent(data);
 	};
 </script>
 
@@ -32,22 +41,24 @@
 			<i class="bi bi-folder2-open text-lg"></i>
 			<span class="text-[10px]">Files</span>
 		</a>
-		<a
-			href="/qr-scan"
+		<button
+			type="button"
 			class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
-			data-annotate="link-qr-scan"
+			onclick={() => (showQrScan = true)}
+			data-annotate="button-qr-scan"
 		>
 			<i class="bi bi-qr-code-scan text-lg"></i>
 			<span class="text-[10px]">Scan</span>
-		</a>
-		<a
-			href="/qr-create"
+		</button>
+		<button
+			type="button"
 			class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
-			data-annotate="link-qr-create"
+			onclick={() => (showQrCreate = true)}
+			data-annotate="button-qr-create"
 		>
 			<i class="bi bi-qr-code text-lg"></i>
 			<span class="text-[10px]">Create</span>
-		</a>
+		</button>
 		<div class="flex-1"></div>
 		<h1 class="text-sm font-medium">Textpad</h1>
 	</header>
@@ -62,3 +73,11 @@
 		></textarea>
 	</main>
 </div>
+
+{#if showQrCreate}
+	<QrCreateModal content={textpadStore.currentContent} onclose={() => (showQrCreate = false)} />
+{/if}
+
+{#if showQrScan}
+	<QrScanModal onscanned={handleScanned} onclose={() => (showQrScan = false)} />
+{/if}

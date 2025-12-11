@@ -1,16 +1,31 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
 	import jsQR from 'jsqr';
-	import textpadStore from '$lib/stores/textpad.svelte';
 	import { toast } from 'svelte-sonner';
 
+	interface Props {
+		onscanned: (data: string) => void;
+		onclose: () => void;
+	}
+
+	let { onscanned, onclose }: Props = $props();
+
+	let dialog: HTMLDialogElement;
 	let canvas: HTMLCanvasElement;
 	let video: HTMLVideoElement | null = null;
 	let scanning = $state(false);
-	let message = $state('Press start to scan QR code');
+	let message = $state('Starting camera...');
 	let scannedData = $state('');
 	let animationFrameId: number | null = null;
+
+	onMount(() => {
+		dialog.showModal();
+		startScan();
+	});
+
+	onDestroy(() => {
+		stopScan();
+	});
 
 	const startScan = async () => {
 		scanning = true;
@@ -97,89 +112,87 @@
 		ctx.stroke();
 	};
 
-	const copyToClipboard = async () => {
-		await navigator.clipboard.writeText(scannedData);
-		toast.success('Copied to clipboard');
-	};
-
-	const useAsText = () => {
-		textpadStore.setContent(scannedData);
-		toast.success('Set as text content');
-		goto('/');
-	};
-
-	onDestroy(() => {
+	const handleDialogClose = () => {
 		stopScan();
-	});
+		onclose();
+	};
+
+	const handleUse = () => {
+		onscanned(scannedData);
+		dialog.close();
+		toast.success('Scanned content applied');
+	};
+
+	const handleBackdropClick = (e: MouseEvent) => {
+		if (e.target === dialog) {
+			dialog.close();
+		}
+	};
+
+	const handleRescan = () => {
+		scannedData = '';
+		startScan();
+	};
 </script>
 
-<div class="flex h-full flex-col bg-slate-900">
-	<header class="flex items-center gap-2 bg-slate-700 px-3 py-2 text-slate-100">
-		<a
-			href="/"
-			class="flex items-center gap-1 rounded px-2 py-1 hover:bg-slate-600"
-			data-annotate="link-back"
-			aria-label="Back"
-		>
-			<i class="bi bi-arrow-left text-xl"></i>
-		</a>
-		<h1 class="text-lg font-medium">QR Scan</h1>
-	</header>
-
-	<main class="flex flex-1 flex-col items-center overflow-auto p-3">
-		<div class="w-full max-w-lg">
-			<canvas
-				bind:this={canvas}
-				class="w-full rounded bg-black"
-			></canvas>
+<dialog
+	bind:this={dialog}
+	class="m-auto w-[90vw] max-w-md rounded-lg bg-slate-800 p-0 backdrop:bg-black/50"
+	onclick={handleBackdropClick}
+	onclose={handleDialogClose}
+	data-annotate="dialog-qr-scan"
+>
+	<div class="flex flex-col p-4">
+		<div class="mb-4 flex items-center justify-between">
+			<h2 class="text-lg font-medium text-slate-100">QR Scan</h2>
+			<button
+				type="button"
+				class="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-100"
+				onclick={() => dialog.close()}
+				data-annotate="button-close-qr-scan"
+				aria-label="Close"
+			>
+				<i class="bi bi-x-lg"></i>
+			</button>
 		</div>
 
-		<div class="mt-4 text-slate-300">{message}</div>
+		<div class="overflow-hidden rounded bg-black">
+			<canvas bind:this={canvas} class="w-full"></canvas>
+		</div>
+
+		<div class="mt-3 text-center text-sm text-slate-300">{message}</div>
 
 		{#if scannedData}
-			<div class="mt-4 w-full max-w-lg rounded bg-slate-800 p-3">
-				<pre class="whitespace-pre-wrap break-all text-slate-100">{scannedData}</pre>
-				<div class="mt-3 flex gap-2">
-					<button
-						type="button"
-						class="flex-1 rounded bg-slate-700 px-4 py-2 text-slate-100 hover:bg-slate-600"
-						onclick={copyToClipboard}
-						data-annotate="button-copy"
-					>
-						<i class="bi bi-clipboard"></i> Copy
-					</button>
-					<button
-						type="button"
-						class="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-500"
-						onclick={useAsText}
-						data-annotate="button-use-text"
-					>
-						<i class="bi bi-file-text"></i> Use
-					</button>
-				</div>
+			<div class="mt-3 rounded bg-slate-900 p-3">
+				<pre class="max-h-32 overflow-auto whitespace-pre-wrap break-all text-sm text-slate-100">{scannedData}</pre>
 			</div>
+			<div class="mt-3 flex gap-2">
+				<button
+					type="button"
+					class="flex-1 rounded bg-slate-700 px-4 py-2 text-slate-100 hover:bg-slate-600"
+					onclick={handleRescan}
+					data-annotate="button-rescan"
+				>
+					<i class="bi bi-arrow-repeat"></i> Rescan
+				</button>
+				<button
+					type="button"
+					class="flex-1 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-500"
+					onclick={handleUse}
+					data-annotate="button-use-scanned"
+				>
+					<i class="bi bi-check-lg"></i> Use
+				</button>
+			</div>
+		{:else if !scanning}
+			<button
+				type="button"
+				class="mt-3 rounded bg-slate-700 px-4 py-2 text-slate-100 hover:bg-slate-600"
+				onclick={startScan}
+				data-annotate="button-retry-scan"
+			>
+				Retry
+			</button>
 		{/if}
-
-		<div class="mt-4 w-full max-w-lg">
-			{#if scanning}
-				<button
-					type="button"
-					class="w-full rounded bg-red-600 px-4 py-3 text-white hover:bg-red-500"
-					onclick={stopScan}
-					data-annotate="button-stop-scan"
-				>
-					Stop
-				</button>
-			{:else}
-				<button
-					type="button"
-					class="w-full rounded bg-slate-700 px-4 py-3 text-slate-100 hover:bg-slate-600"
-					onclick={startScan}
-					data-annotate="button-start-scan"
-				>
-					Start Scan
-				</button>
-			{/if}
-		</div>
-	</main>
-</div>
+	</div>
+</dialog>
