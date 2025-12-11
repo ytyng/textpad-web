@@ -22,7 +22,7 @@
 	};
 </script>
 
-<div class="flex h-[max(50vh,calc(100vh-400px))] flex-col">
+<div class="flex h-[max(55vh,calc(100vh-400px))] flex-col">
 	<header class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100">
 		<button
 			type="button"
