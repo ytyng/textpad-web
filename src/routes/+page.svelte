@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import textpadStore from "$lib/stores/textpad.svelte";
   import fontSizeStore from "$lib/stores/fontSize.svelte";
   import { toast } from "svelte-sonner";
@@ -9,6 +10,11 @@
   let showQrCreate = $state(false);
   let showQrScan = $state(false);
   let showFontSize = $state(false);
+  let textareaElement: HTMLTextAreaElement;
+
+  onMount(() => {
+    textareaElement?.focus();
+  });
 
   const handleInput = (e: Event) => {
     const target = e.target as HTMLTextAreaElement;
@@ -83,6 +89,7 @@
 
   <main class="flex-1 overflow-hidden">
     <textarea
+      bind:this={textareaElement}
       class="h-full w-full resize-none bg-neutral-900 p-2 text-slate-100 outline-none font-mono"
       style="font-size: {fontSizeStore.fontSize}px"
       placeholder="Enter text here..."
