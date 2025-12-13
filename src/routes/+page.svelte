@@ -1,85 +1,105 @@
 <script lang="ts">
-  import textpadStore from '$lib/stores/textpad.svelte';
-	import { toast } from 'svelte-sonner';
-	import QrCreateModal from '$lib/components/QrCreateModal.svelte';
-	import QrScanModal from '$lib/components/QrScanModal.svelte';
+  import textpadStore from "$lib/stores/textpad.svelte";
+  import fontSizeStore from "$lib/stores/fontSize.svelte";
+  import { toast } from "svelte-sonner";
+  import QrCreateModal from "$lib/components/QrCreateModal.svelte";
+  import QrScanModal from "$lib/components/QrScanModal.svelte";
+  import FontSizeModal from "$lib/components/FontSizeModal.svelte";
 
-	let showQrCreate = $state(false);
-	let showQrScan = $state(false);
+  let showQrCreate = $state(false);
+  let showQrScan = $state(false);
+  let showFontSize = $state(false);
 
-	const handleInput = (e: Event) => {
-		const target = e.target as HTMLTextAreaElement;
-		textpadStore.updateContent(target.value);
-};
+  const handleInput = (e: Event) => {
+    const target = e.target as HTMLTextAreaElement;
+    textpadStore.updateContent(target.value);
+  };
 
+  const handleNewFile = () => {
+    textpadStore.createNewFile();
+    toast.success("New file created");
+  };
 
-	const handleNewFile = () => {
-		textpadStore.createNewFile();
-		toast.success('New file created');
-	};
-
-	const handleScanned = (data: string) => {
-		textpadStore.setContent(data);
-	};
+  const handleScanned = (data: string) => {
+    textpadStore.setContent(data);
+  };
 </script>
 
 <!-- これ以上大きくすると iPhone でスクロールしてしまう -->
 <div class="flex h-[max(50vh,calc(100vh-400px))] flex-col">
-	<header class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100">
-		<button
-			type="button"
-			class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
-			onclick={handleNewFile}
-			data-annotate="button-new-file"
-		>
-			<i class="bi bi-file-plus text-lg"></i>
-			<span class="text-[10px]">New</span>
-		</button>
-		<a
-			href="/files"
-			class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
-			data-annotate="link-file-list"
-		>
-			<i class="bi bi-folder2-open text-lg"></i>
-			<span class="text-[10px]">Files</span>
-		</a>
-		<button
-			type="button"
-			class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
-			onclick={() => (showQrScan = true)}
-			data-annotate="button-qr-scan"
-		>
-			<i class="bi bi-qr-code-scan text-lg"></i>
-			<span class="text-[10px]">Scan</span>
-		</button>
-		<button
-			type="button"
-			class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
-			onclick={() => (showQrCreate = true)}
-			data-annotate="button-qr-create"
-		>
-			<i class="bi bi-qr-code text-lg"></i>
-			<span class="text-[10px]">Create</span>
-		</button>
-		<div class="flex-1"></div>
-		<h1 class="text-sm font-medium">Textpad</h1>
-	</header>
+  <header class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100">
+    <button
+      type="button"
+      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      onclick={handleNewFile}
+      data-annotate="button-new-file"
+    >
+      <i class="bi bi-file-plus text-lg"></i>
+      <span class="text-[10px]">New</span>
+    </button>
+    <a
+      href="/files"
+      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      data-annotate="link-file-list"
+    >
+      <i class="bi bi-folder2-open text-lg"></i>
+      <span class="text-[10px]">Files</span>
+    </a>
+    <button
+      type="button"
+      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      onclick={() => (showQrScan = true)}
+      data-annotate="button-qr-scan"
+    >
+      <i class="bi bi-qr-code-scan text-lg"></i>
+      <span class="text-[10px]">Scan</span>
+    </button>
+    <button
+      type="button"
+      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      onclick={() => (showQrCreate = true)}
+      data-annotate="button-qr-create"
+    >
+      <i class="bi bi-qr-code text-lg"></i>
+      <span class="text-[10px]">Create</span>
+    </button>
+    <button
+      type="button"
+      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      onclick={() => (showFontSize = true)}
+      data-annotate="button-font-size"
+    >
+      <i class="bi bi-fonts text-lg"></i>
+      <span class="text-[10px]">Font</span>
+    </button>
 
-	<main class="flex-1 overflow-hidden">
-		<textarea
-			class="h-full w-full resize-none bg-neutral-900 p-2 text-base text-slate-100 outline-none font-mono"
-			placeholder="Enter text here..."
-			value={textpadStore.currentContent}
-			oninput={handleInput}
-			data-annotate="textarea-main"
-		></textarea>
-	</main>
+    <div class="flex-1"></div>
+    <h1 class="text-sm font-medium">Textpad</h1>
+  </header>
+
+  <main class="flex-1 overflow-hidden">
+    <textarea
+      class="h-full w-full resize-none bg-neutral-900 p-2 text-slate-100 outline-none font-mono"
+      style="font-size: {fontSizeStore.fontSize}px"
+      placeholder="Enter text here..."
+      value={textpadStore.currentContent}
+      oninput={handleInput}
+      data-annotate="textarea-main"
+    ></textarea>
+  </main>
 </div>
 
 {#if showQrCreate}
-	<QrCreateModal content={textpadStore.currentContent} onclose={() => (showQrCreate = false)} />
+  <QrCreateModal
+    content={textpadStore.currentContent}
+    onclose={() => (showQrCreate = false)}
+  />
 {/if}
 
 {#if showQrScan}
-	<QrScanModal onscanned={handleScanned} onclose={() => (showQrScan = false)} />
+  <QrScanModal onscanned={handleScanned} onclose={() => (showQrScan = false)} />
+{/if}
+
+{#if showFontSize}
+  <FontSizeModal onclose={() => (showFontSize = false)} />
 {/if}
