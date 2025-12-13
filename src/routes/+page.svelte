@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import textpadStore from "$lib/stores/textpad.svelte";
   import fontSizeStore from "$lib/stores/fontSize.svelte";
   import { toast } from "svelte-sonner";
@@ -11,10 +11,59 @@
   let showQrScan = $state(false);
   let showFontSize = $state(false);
   let textareaElement: HTMLTextAreaElement;
+  let containerElement: HTMLDivElement;
+
+  // iOS キーボード表示時のスクロール防止
+  const preventScroll = () => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
+  const handleFocus = () => {
+    // focus 時に少し遅延してスクロールをリセット (iOS がスクロールした後に実行)
+    setTimeout(preventScroll, 50);
+    setTimeout(preventScroll, 100);
+    setTimeout(preventScroll, 300);
+  };
 
   onMount(() => {
     textareaElement?.focus();
+
+    // visualViewport API でビューポート変化を監視
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", preventScroll);
+      window.visualViewport.addEventListener("scroll", preventScroll);
+    }
+
+    // 通常のスクロールイベントも監視
+    window.addEventListener("scroll", preventScroll, { passive: false });
+    document.addEventListener("scroll", preventScroll, { passive: false });
+
+    // タッチ移動によるスクロールを防止 (textarea 内は除外)
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
   });
+
+  onDestroy(() => {
+    if (typeof window !== "undefined") {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", preventScroll);
+        window.visualViewport.removeEventListener("scroll", preventScroll);
+      }
+      window.removeEventListener("scroll", preventScroll);
+      document.removeEventListener("scroll", preventScroll);
+      document.removeEventListener("touchmove", handleTouchMove);
+    }
+  });
+
+  const handleTouchMove = (e: TouchEvent) => {
+    // textarea 内のスクロールは許可
+    if (e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
+    // それ以外はスクロール防止
+    e.preventDefault();
+  };
 
   const handleInput = (e: Event) => {
     const target = e.target as HTMLTextAreaElement;
@@ -31,8 +80,11 @@
   };
 </script>
 
-<!-- これ以上大きくすると iPhone でスクロールしてしまう -->
-<div class="flex h-[max(50vh,calc(100vh-400px))] flex-col">
+<!-- テキストエリアの高さはキーボード表示時に隠れないサイズに固定 -->
+<div
+  bind:this={containerElement}
+  class="flex h-[max(45vh,calc(100vh-450px))] flex-col"
+>
   <header class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100">
     <button
       type="button"
@@ -95,6 +147,7 @@
       placeholder="Enter text here..."
       value={textpadStore.currentContent}
       oninput={handleInput}
+      onfocus={handleFocus}
       data-annotate="textarea-main"
     ></textarea>
   </main>
