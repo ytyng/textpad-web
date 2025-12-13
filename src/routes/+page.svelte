@@ -130,7 +130,7 @@
       data-annotate="button-font-size"
     >
       <i class="bi bi-fonts text-lg"></i>
-      <span class="text-[10px]">Font</span>
+      <span class="text-[10px]">Size</span>
     </button>
 
     <div class="flex-1"></div>
