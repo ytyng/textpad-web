@@ -83,10 +83,10 @@
 <!-- テキストエリアの高さはキーボード表示時に隠れないサイズに固定 -->
 <div
   bind:this={containerElement}
-  class="flex h-[max(50vh,calc(100vh-400px))] flex-col"
+  class="flex h-[max(50vh,calc(100vh-400px))] flex-col relative"
 >
   <header
-    class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100 hidden"
+    class="flex items-center gap-1 bg-slate-700 px-2 text-slate-100 absolute top-0 left-0 right-0 z-10 h-14"
   >
     <button
       type="button"
@@ -144,7 +144,7 @@
   <main class="flex-1 overflow-hidden">
     <textarea
       bind:this={textareaElement}
-      class="h-full w-full resize-none bg-neutral-900 p-2 pt-32 text-slate-100 outline-none font-mono"
+      class="h-full w-full resize-none bg-neutral-900 p-2 pt-16 text-slate-100 outline-none font-mono"
       style="font-size: {fontSizeStore.fontSize}px"
       placeholder="Enter text here..."
       value={textpadStore.currentContent}
