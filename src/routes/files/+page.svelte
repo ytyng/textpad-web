@@ -2,17 +2,7 @@
   import { goto } from "$app/navigation";
   import textpadStore from "$lib/stores/textpad.svelte";
   import { toast } from "svelte-sonner";
-
-  const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp);
-    return date.toLocaleString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  import { formatDateTime, humanReadableTime } from "$lib/utils/time";
 
   const handleOpen = (id: string) => {
     textpadStore.openFile(id);
@@ -62,9 +52,9 @@
               data-annotate="button-open-file"
             >
               <span class="font-medium text-slate-100">{file.title}</span>
-              <span class="text-sm text-slate-400"
-                >{formatDate(file.updatedAt)}</span
-              >
+              <span class="text-sm text-slate-400">
+                {formatDateTime(file.updatedAt)} ({humanReadableTime(file.updatedAt)})
+              </span>
             </button>
             <button
               type="button"
