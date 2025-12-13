@@ -40,3 +40,13 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'CLEAR_CACHE') {
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((key) => caches.delete(key)));
+    }).then(() => {
+      event.source?.postMessage({ type: 'CACHE_CLEARED' });
+    });
+  }
+});

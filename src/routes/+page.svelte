@@ -74,7 +74,11 @@
     </button>
 
     <div class="flex-1"></div>
-    <h1 class="text-sm font-medium">Textpad</h1>
+    <a
+      href="/about"
+      class="text-sm font-medium hover:text-slate-300 pe-1"
+      data-annotate="link-about">Textpad</a
+    >
   </header>
 
   <main class="flex-1 overflow-hidden">
