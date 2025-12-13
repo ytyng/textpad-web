@@ -85,7 +85,9 @@
   bind:this={containerElement}
   class="flex h-[max(45vh,calc(100vh-450px))] flex-col"
 >
-  <header class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100">
+  <header
+    class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100 hidden"
+  >
     <button
       type="button"
       class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
@@ -142,7 +144,7 @@
   <main class="flex-1 overflow-hidden">
     <textarea
       bind:this={textareaElement}
-      class="h-full w-full resize-none bg-neutral-900 p-2 text-slate-100 outline-none font-mono"
+      class="h-full w-full resize-none bg-neutral-900 p-2 pt-32 text-slate-100 outline-none font-mono"
       style="font-size: {fontSizeStore.fontSize}px"
       placeholder="Enter text here..."
       value={textpadStore.currentContent}
