@@ -83,7 +83,7 @@
 <!-- テキストエリアの高さはキーボード表示時に隠れないサイズに固定 -->
 <div
   bind:this={containerElement}
-  class="flex h-[max(45vh,calc(100vh-450px))] flex-col"
+  class="flex h-[max(50vh,calc(100vh-400px))] flex-col"
 >
   <header
     class="flex items-center gap-1 bg-slate-700 px-2 py-1 text-slate-100 hidden"
