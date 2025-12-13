@@ -1,5 +1,5 @@
 <script lang="ts">
-	import textpadStore from '$lib/stores/textpad.svelte';
+  import textpadStore from '$lib/stores/textpad.svelte';
 	import { toast } from 'svelte-sonner';
 	import QrCreateModal from '$lib/components/QrCreateModal.svelte';
 	import QrScanModal from '$lib/components/QrScanModal.svelte';
@@ -10,7 +10,8 @@
 	const handleInput = (e: Event) => {
 		const target = e.target as HTMLTextAreaElement;
 		textpadStore.updateContent(target.value);
-	};
+};
+
 
 	const handleNewFile = () => {
 		textpadStore.createNewFile();

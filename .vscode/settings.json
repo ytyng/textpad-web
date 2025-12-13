@@ -1,5 +1,46 @@
 {
-	"files.associations": {
-		"*.css": "tailwindcss"
-	}
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.renderWhitespace": "all",
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.rulers": [88],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode",
+    "editor.formatOnSave": true
+  },
+  "typescript.preferences.useAliasesForRenames": false,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.suggest.autoImports": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.wrangler": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.wrangler": true
+  },
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  }
 }
