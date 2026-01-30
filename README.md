@@ -1,72 +1,76 @@
 # Textpad Web
 
-シンプルなテキスト入力 Web アプリ。スマホでの使用を想定しており、漢字変換の確認などに使える。
+![](./static/icon-192.png)
 
-PWA として動作し、iPhone のホームスクリーンに追加して簡易的なアプリとして使用可能。
+A simple text input web app designed for mobile use, useful for checking kanji conversion and more.
 
-## 機能
+![](documents/images/screenshot.png)
 
-- テキスト入力 (全画面テキストエリア)
-- ローカルストレージへの自動保存 (1秒後)
-- 複数ファイル管理
-- QR コード読み取り (カメラ使用)
-- QR コード生成
+Works as a PWA — add it to your iPhone home screen to use it as a lightweight app.
 
-## 技術スタック
+## Features
+
+- Text input (fullscreen textarea)
+- Auto-save to local storage (after 1 second)
+- Multiple file management
+- QR code scanning (using camera)
+- QR code generation
+
+## Tech Stack
 
 - SvelteKit 2 + Svelte 5 (runes)
 - Tailwind CSS 4
 - TypeScript
 - adapter-static (SSG)
-- svelte-sonner (トースト通知)
-- jsqr / qrcode (QR コード処理)
+- svelte-sonner (toast notifications)
+- jsqr / qrcode (QR code processing)
 - Bootstrap Icons
 
-## 開発
+## Development
 
 ```bash
-# 依存パッケージのインストール
+# Install dependencies
 pnpm install
 
-# 開発サーバー起動
+# Start dev server
 pnpm dev
 
-# 型チェック
+# Type check
 pnpm check
 
-# ビルド
+# Build
 pnpm build
 
-# ビルド結果のプレビュー
+# Preview build output
 pnpm preview
 ```
 
-## デプロイ
+## Deployment
 
-Vercel にデプロイする。GitHub にプッシュすると自動でビルドされる。
+Deployed to Vercel. Pushing to GitHub triggers an automatic build.
 
-設定ファイル:
-- `svelte.config.js`: adapter-static 設定
-- `vercel.json`: ビルドコマンドと出力ディレクトリ
-- `src/routes/+layout.ts`: prerender 有効化
+Configuration files:
+- `svelte.config.js`: adapter-static settings
+- `vercel.json`: Build command and output directory
+- `src/routes/+layout.ts`: Prerender enabled
 
-## プロジェクト構成
+## Project Structure
 
 ```
 src/
   routes/
-    +page.svelte       # メインテキスト入力画面
-    +layout.svelte     # レイアウト (Toaster)
-    +layout.ts         # prerender 設定
-    files/+page.svelte # ファイル一覧
-    qr-scan/+page.svelte  # QR コード読み取り
-    qr-create/+page.svelte # QR コード生成
+    +page.svelte       # Main text input page
+    +layout.svelte     # Layout (Toaster)
+    +layout.ts         # Prerender config
+    files/+page.svelte # File list
+    qr-scan/+page.svelte  # QR code scanner
+    qr-create/+page.svelte # QR code generator
   lib/
     stores/
-      textpad.svelte.ts # ファイル管理ストア (Svelte 5 runes)
-  service-worker.ts    # PWA 用サービスワーカー
+      textpad.svelte.ts # File management store (Svelte 5 runes)
+  service-worker.ts    # Service worker for PWA
 static/
-  manifest.json        # PWA マニフェスト
-  icon-192.png         # アプリアイコン
-  icon-512.png         # アプリアイコン (大)
+  manifest.json        # PWA manifest
+  icon-192.png         # App icon
+  icon-512.png         # App icon (large)
 ```
