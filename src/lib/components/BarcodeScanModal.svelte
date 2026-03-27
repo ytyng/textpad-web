@@ -24,6 +24,7 @@
 	let detector: BarcodeDetectorType | null = null;
 	let flashVisible = $state(false);
 	let audioCtx: AudioContext | null = null;
+	let flashTimeoutId: ReturnType<typeof setTimeout> | null = null;
 	// Auto モード: 検出スロットル (500ms) + 成功後クールダウン (4s) + 同一コード抑制 (10s)
 	let lastDetectAttempt = 0;
 	let lastScanTime = 0;
@@ -78,6 +79,11 @@
 
 	onDestroy(() => {
 		stopScan();
+		if (flashTimeoutId) clearTimeout(flashTimeoutId);
+		if (audioCtx) {
+			audioCtx.close();
+			audioCtx = null;
+		}
 	});
 
 	const startScan = async () => {
@@ -216,17 +222,21 @@
 		}
 
 		flashVisible = true;
-		setTimeout(() => {
+		flashTimeoutId = setTimeout(() => {
 			flashVisible = false;
+			flashTimeoutId = null;
 		}, 200);
 	};
 
 	// Scan ボタン押下: 生フレームを再描画してから1回だけ detect
 	const handleScan = async () => {
 		if (!detector || !canvas || !video) return;
+		if (!video.videoWidth || !video.videoHeight) return;
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
-		// オーバーレイなしの生フレームで検出
+		// canvas サイズを video に合わせてから生フレームで検出
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
 		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 		message = 'Detecting...';
 		try {
