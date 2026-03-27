@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import {
+		startCameraStream,
+		stopCameraStream,
+		notifyDetection as notify
+	} from '$lib/utils/camera';
 	import type {
 		BarcodeFormat,
 		BarcodeDetector as BarcodeDetectorType,
@@ -90,18 +95,8 @@
 		scanning = true;
 		message = 'Starting camera...';
 
-		video = document.createElement('video');
-		video.setAttribute('playsinline', 'true');
-		video.muted = true;
-		video.autoplay = true;
-
 		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				audio: false,
-				video: { facingMode: 'environment' }
-			});
-			video.srcObject = stream;
-			await video.play();
+			video = await startCameraStream();
 			message = 'Scanning...';
 			tick();
 		} catch (err) {
@@ -113,15 +108,8 @@
 
 	const stopScan = () => {
 		scanning = false;
-		if (animationFrameId) {
-			cancelAnimationFrame(animationFrameId);
-			animationFrameId = null;
-		}
-		if (video?.srcObject) {
-			const stream = video.srcObject as MediaStream;
-			stream.getTracks().forEach((track) => track.stop());
-			video.srcObject = null;
-		}
+		stopCameraStream(video, animationFrameId);
+		animationFrameId = null;
 		video = null;
 	};
 
@@ -202,30 +190,17 @@
 	};
 
 	const notifyDetection = () => {
-		try {
-			if (!audioCtx) audioCtx = new AudioContext();
-			const oscillator = audioCtx.createOscillator();
-			const gainNode = audioCtx.createGain();
-			oscillator.connect(gainNode);
-			gainNode.connect(audioCtx.destination);
-			oscillator.type = 'sine';
-			oscillator.frequency.value = 1200;
-			gainNode.gain.value = 0.3;
-			oscillator.start();
-			oscillator.stop(audioCtx.currentTime + 0.1);
-		} catch {
-			// AudioContext unavailable
-		}
-
-		if (navigator.vibrate) {
-			navigator.vibrate(100);
-		}
-
-		flashVisible = true;
-		flashTimeoutId = setTimeout(() => {
-			flashVisible = false;
-			flashTimeoutId = null;
-		}, 200);
+		notify(
+			audioCtx,
+			(ctx) => (audioCtx = ctx),
+			() => {
+				flashVisible = true;
+				flashTimeoutId = setTimeout(() => {
+					flashVisible = false;
+					flashTimeoutId = null;
+				}, 200);
+			}
+		);
 	};
 
 	// Scan ボタン押下: 生フレームを再描画してから1回だけ detect
@@ -262,18 +237,12 @@
 		stopScan();
 		onclose();
 	};
-
-	const handleBackdropClick = (e: MouseEvent) => {
-		if (e.target === dialog) {
-			dialog.close();
-		}
-	};
 </script>
 
 <dialog
 	bind:this={dialog}
 	class="m-auto w-[90vw] max-w-md rounded-lg bg-slate-800 p-0 backdrop:bg-black/50"
-	onclick={handleBackdropClick}
+	onclick={(e: MouseEvent) => { if (e.target === dialog) dialog.close(); }}
 	onclose={handleDialogClose}
 	data-annotate="dialog-barcode-scan"
 >

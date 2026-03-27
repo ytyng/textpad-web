@@ -7,10 +7,12 @@
   import QrScanModal from "$lib/components/QrScanModal.svelte";
   import FontSizeModal from "$lib/components/FontSizeModal.svelte";
   import BarcodeScanModal from "$lib/components/BarcodeScanModal.svelte";
+  import OcrScanModal from "$lib/components/OcrScanModal.svelte";
 
   let showQrCreate = $state(false);
   let showQrScan = $state(false);
   let showBarcodeScan = $state(false);
+  let showOcrScan = $state(false);
   let showFontSize = $state(false);
   let textareaElement: HTMLTextAreaElement;
   let containerElement: HTMLDivElement;
@@ -81,7 +83,7 @@
     textpadStore.setContent(data);
   };
 
-  const handleBarcodeScanned = (data: string) => {
+  const handleAppendScanned = (data: string) => {
     textpadStore.setContent(textpadStore.currentContent + data);
   };
 </script>
@@ -141,6 +143,15 @@
     <button
       type="button"
       class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
+      onclick={() => (showOcrScan = true)}
+      data-annotate="button-ocr-scan"
+    >
+      <i class="bi bi-body-text text-lg"></i>
+      <span class="text-[10px]">OCR</span>
+    </button>
+    <button
+      type="button"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
       onclick={() => (showFontSize = true)}
       data-annotate="button-font-size"
     >
@@ -183,8 +194,15 @@
 
 {#if showBarcodeScan}
   <BarcodeScanModal
-    onscanned={handleBarcodeScanned}
+    onscanned={handleAppendScanned}
     onclose={() => (showBarcodeScan = false)}
+  />
+{/if}
+
+{#if showOcrScan}
+  <OcrScanModal
+    onscanned={handleAppendScanned}
+    onclose={() => (showOcrScan = false)}
   />
 {/if}
 
