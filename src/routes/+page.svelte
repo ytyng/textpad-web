@@ -6,9 +6,11 @@
   import QrCreateModal from "$lib/components/QrCreateModal.svelte";
   import QrScanModal from "$lib/components/QrScanModal.svelte";
   import FontSizeModal from "$lib/components/FontSizeModal.svelte";
+  import BarcodeScanModal from "$lib/components/BarcodeScanModal.svelte";
 
   let showQrCreate = $state(false);
   let showQrScan = $state(false);
+  let showBarcodeScan = $state(false);
   let showFontSize = $state(false);
   let textareaElement: HTMLTextAreaElement;
   let containerElement: HTMLDivElement;
@@ -78,6 +80,10 @@
   const handleScanned = (data: string) => {
     textpadStore.setContent(data);
   };
+
+  const handleBarcodeScanned = (data: string) => {
+    textpadStore.setContent(textpadStore.currentContent + data);
+  };
 </script>
 
 <!-- テキストエリアの高さはキーボード表示時に隠れないサイズに固定 -->
@@ -86,11 +92,11 @@
   class="flex h-[max(50vh,calc(100vh-400px))] flex-col relative"
 >
   <header
-    class="flex items-center gap-1 bg-slate-700 px-2 text-slate-100 absolute top-0 left-0 right-0 z-10 h-14"
+    class="flex items-center bg-slate-700 px-2 text-slate-100 absolute top-0 left-0 right-0 z-10 h-14"
   >
     <button
       type="button"
-      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
       onclick={handleNewFile}
       data-annotate="button-new-file"
     >
@@ -99,7 +105,7 @@
     </button>
     <a
       href="/files"
-      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
       data-annotate="link-file-list"
     >
       <i class="bi bi-folder2-open text-lg"></i>
@@ -107,25 +113,34 @@
     </a>
     <button
       type="button"
-      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
       onclick={() => (showQrScan = true)}
       data-annotate="button-qr-scan"
     >
       <i class="bi bi-qr-code-scan text-lg"></i>
-      <span class="text-[10px]">Scan</span>
+      <span class="text-[10px] scale-x-80">2DScan</span>
     </button>
     <button
       type="button"
-      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
       onclick={() => (showQrCreate = true)}
       data-annotate="button-qr-create"
     >
       <i class="bi bi-qr-code text-lg"></i>
-      <span class="text-[10px]">Create</span>
+      <span class="text-[10px] scale-x-80">2DCreate</span>
     </button>
     <button
       type="button"
-      class="flex flex-col items-center rounded px-2 py-1 hover:bg-slate-600"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
+      onclick={() => (showBarcodeScan = true)}
+      data-annotate="button-barcode-scan"
+    >
+      <i class="bi bi-upc-scan text-lg"></i>
+      <span class="text-[10px] scale-x-80">1DScan</span>
+    </button>
+    <button
+      type="button"
+      class="flex flex-col items-center rounded w-10 py-1 hover:bg-slate-600"
       onclick={() => (showFontSize = true)}
       data-annotate="button-font-size"
     >
@@ -164,6 +179,13 @@
 
 {#if showQrScan}
   <QrScanModal onscanned={handleScanned} onclose={() => (showQrScan = false)} />
+{/if}
+
+{#if showBarcodeScan}
+  <BarcodeScanModal
+    onscanned={handleBarcodeScanned}
+    onclose={() => (showBarcodeScan = false)}
+  />
 {/if}
 
 {#if showFontSize}
