@@ -24,7 +24,8 @@
 	let detector: BarcodeDetectorType | null = null;
 	let flashVisible = $state(false);
 	let audioCtx: AudioContext | null = null;
-	// Auto モード: 再スキャン抑制用
+	// Auto モード: 検出スロットル (500ms) + 成功後クールダウン (4s) + 同一コード抑制 (10s)
+	let lastDetectAttempt = 0;
 	let lastScanTime = 0;
 	const recentScans: Map<string, number> = new Map(); // value → timestamp
 
@@ -65,8 +66,14 @@
 
 	onMount(async () => {
 		dialog.showModal();
-		await initDetector();
-		startScan();
+		try {
+			await initDetector();
+			startScan();
+		} catch (err) {
+			const error = err as Error;
+			scanning = false;
+			message = `Scanner init error: ${error.message}`;
+		}
 	});
 
 	onDestroy(() => {
@@ -137,24 +144,34 @@
 			if (ctx) {
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-				// Auto ON: 生フレームで検出してからオーバーレイ描画 (4秒クールダウン + 同一コード10秒抑制)
+				// Auto ON: 生フレームで検出してからオーバーレイ描画
+				// 500msスロットル + 成功後4秒クールダウン + 同一コード10秒抑制
 				if (autoScan) {
 					const now = Date.now();
-					if (now - lastScanTime >= 4000) {
-						const barcodes = await detector.detect(canvas);
-						if (!scanning) return;
-						if (barcodes.length > 0) {
-							const barcode = barcodes[0];
-							const lastSeen = recentScans.get(barcode.rawValue);
-							if (!lastSeen || now - lastSeen >= 10000) {
-								message = `${FORMAT_LABELS[barcode.format] || barcode.format}: ${barcode.rawValue}`;
-								drawHighlight(ctx, barcode.cornerPoints);
-								notifyDetection();
-								onscanned(barcode.rawValue + '\n');
-								toast.success(`${FORMAT_LABELS[barcode.format] || 'Barcode'}: ${barcode.rawValue}`);
-								lastScanTime = now;
-								recentScans.set(barcode.rawValue, now);
+					if (now - lastDetectAttempt >= 500 && now - lastScanTime >= 4000) {
+						lastDetectAttempt = now;
+						try {
+							const barcodes = await detector.detect(canvas);
+							if (!scanning) return;
+							if (barcodes.length > 0) {
+								const barcode = barcodes[0];
+								const lastSeen = recentScans.get(barcode.rawValue);
+								if (!lastSeen || now - lastSeen >= 10000) {
+									message = `${FORMAT_LABELS[barcode.format] || barcode.format}: ${barcode.rawValue}`;
+									drawHighlight(ctx, barcode.cornerPoints);
+									notifyDetection();
+									onscanned(barcode.rawValue + '\n');
+									toast.success(`${FORMAT_LABELS[barcode.format] || 'Barcode'}: ${barcode.rawValue}`);
+									lastScanTime = now;
+									recentScans.set(barcode.rawValue, now);
+									// 古いエントリをパージ
+									for (const [key, ts] of recentScans) {
+										if (now - ts >= 10000) recentScans.delete(key);
+									}
+								}
 							}
+						} catch {
+							message = 'Detection error';
 						}
 					}
 				}
@@ -212,17 +229,21 @@
 		// オーバーレイなしの生フレームで検出
 		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 		message = 'Detecting...';
-		const barcodes = await detector.detect(canvas);
-		if (barcodes.length > 0) {
-			const barcode = barcodes[0];
-			const label = FORMAT_LABELS[barcode.format] || barcode.format;
-			message = `${label}: ${barcode.rawValue}`;
-			drawHighlight(ctx, barcode.cornerPoints);
-			notifyDetection();
-			onscanned(barcode.rawValue + '\n');
-			toast.success(`${label}: ${barcode.rawValue}`);
-		} else {
-			message = 'No barcode found';
+		try {
+			const barcodes = await detector.detect(canvas);
+			if (barcodes.length > 0) {
+				const barcode = barcodes[0];
+				const label = FORMAT_LABELS[barcode.format] || barcode.format;
+				message = `${label}: ${barcode.rawValue}`;
+				drawHighlight(ctx, barcode.cornerPoints);
+				notifyDetection();
+				onscanned(barcode.rawValue + '\n');
+				toast.success(`${label}: ${barcode.rawValue}`);
+			} else {
+				message = 'No barcode found';
+			}
+		} catch {
+			message = 'Detection failed';
 		}
 		drawScanRegion(ctx, canvas.width, canvas.height);
 	};
