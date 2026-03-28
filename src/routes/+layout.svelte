@@ -1,18 +1,18 @@
 <script lang="ts">
-	import './layout.css';
-	import { Toaster } from 'svelte-sonner';
-	import { onMount } from 'svelte';
-	import textpadStore from '$lib/stores/textpad.svelte';
+  import './layout.css';
+  import { Toaster } from 'svelte-sonner';
+  import { onMount } from 'svelte';
+  import textpadStore from '$lib/stores/textpad.svelte';
 
-	let { children } = $props();
+  let { children } = $props();
 
-	onMount(() => {
-		textpadStore.initialize();
-	});
+  onMount(() => {
+    textpadStore.initialize();
+  });
 </script>
 
 <svelte:head>
-	<title>Textpad</title>
+  <title>Textpad</title>
 </svelte:head>
 
 {@render children()}
