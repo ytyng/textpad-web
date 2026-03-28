@@ -177,8 +177,8 @@
 			if (ctx) {
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-				// Auto scan: workerReady かつ認識中でなければスロットル間隔で認識
-				if (autoScan && workerReady && !recognizing) {
+				// Auto scan: workerReady かつ認識中でなく、結果未表示の場合のみスロットル間隔で認識
+				if (autoScan && workerReady && !recognizing && !recognizedText) {
 					const now = Date.now();
 					if (now - lastDetectAttempt >= AUTO_SCAN_INTERVAL) {
 						lastDetectAttempt = now;

@@ -21,7 +21,7 @@ export function stopCameraStream(
 	video: HTMLVideoElement | null,
 	animationFrameId: number | null
 ): void {
-	if (animationFrameId) {
+	if (animationFrameId !== null) {
 		cancelAnimationFrame(animationFrameId);
 	}
 	if (video?.srcObject) {
